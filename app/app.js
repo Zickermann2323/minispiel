@@ -6,6 +6,8 @@
  */
 
 // Needed for redux-saga es6 generator support
+import BallGame from 'components/BallGame';
+
 import '@babel/polyfill';
 
 // Import all the third party stuff
