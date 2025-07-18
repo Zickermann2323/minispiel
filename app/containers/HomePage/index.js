@@ -95,6 +95,7 @@ export function HomePage({
             </label>
           </Form>
           <ReposList {...reposListProps} />
+                  <BallGame />
         </Section>
       </div>
     </article>
