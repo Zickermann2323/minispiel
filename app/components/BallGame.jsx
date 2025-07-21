@@ -1,85 +1,46 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './BallGame.css';
 
-export default function BallGame() {
-  const [targetIndex, setTargetIndex] = useState(null);
-  const [showTarget, setShowTarget] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [positions, setPositions] = useState([
-    { top: 100, left: 100 },
-    { top: 100, left: 300 },
-    { top: 300, left: 100 },
-    { top: 300, left: 300 },
-  ]);
-  const [canGuess, setCanGuess] = useState(false);
-  const [result, setResult] = useState('');
-  const intervalRef = useRef(null);
+const BallGame = () => {
+  const canvasRef = useRef(null);
+  const [x, setX] = useState(50);
+  const [y, setY] = useState(50);
+  const [dx, setDx] = useState(2);
+  const [dy, setDy] = useState(2);
+  const radius = 10;
 
-  const moveBalls = () => {
-    setPositions(() =>
-      Array.from({ length: 4 }, () => ({
-        top: Math.random() * 300 + 50,
-        left: Math.random() * 300 + 50,
-      }))
-    );
-  };
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
 
-  const startGame = () => {
-    if (gameStarted) return;
-    setShowTarget(false);
-    setGameStarted(true);
-    setResult('');
-    moveBalls();
-    intervalRef.current = setInterval(moveBalls, 500);
+    const draw = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.fillStyle = '#3498db';
+      context.fill();
+      context.closePath();
 
-    setTimeout(() => {
-      clearInterval(intervalRef.current);
-      setGameStarted(false);
-      setCanGuess(true);
-    }, 15000);
-  };
+      let newX = x + dx;
+      let newY = y + dy;
 
-  const handleGuess = (index) => {
-    if (!canGuess) return;
-    setResult(index === targetIndex ? '🎉 Richtig!' : '❌ Falsch!');
-    setCanGuess(false);
-  };
+      if (newX + radius > canvas.width || newX - radius < 0) setDx(-dx);
+      if (newY + radius > canvas.height || newY - radius < 0) setDy(-dy);
 
-  const revealTarget = () => {
-    if (gameStarted) return;
-    const randomIndex = Math.floor(Math.random() * 4);
-    setTargetIndex(randomIndex);
-    setShowTarget(true);
-    setResult('');
-  };
+      setX(newX);
+      setY(newY);
+    };
+
+    const interval = setInterval(draw, 16);
+    return () => clearInterval(interval);
+  }, [x, y, dx, dy]);
 
   return (
-    <div className="game-container">
-      <div className="controls">
-        <button onClick={revealTarget} disabled={gameStarted}>
-          Show Target
-        </button>
-        <button onClick={startGame} disabled={gameStarted || targetIndex === null}>
-          Start
-        </button>
-      </div>
-
-      <div className="play-area">
-        {positions.map((pos, i) => (
-          <div
-            key={i}
-            className="ball"
-            onClick={() => handleGuess(i)}
-            style={{
-              top: pos.top,
-              left: pos.left,
-              backgroundColor: showTarget && i === targetIndex ? 'red' : 'blue',
-            }}
-          />
-        ))}
-      </div>
-
-      {result && <div className="result">{result}</div>}
+    <div className="ball-game-container">
+      <h1>Hallo Welt: Ball Game</h1>
+      <canvas ref={canvasRef} width={300} height={300} />
     </div>
   );
-}
+};
+
+export default BallGame;
